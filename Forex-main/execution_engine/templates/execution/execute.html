@@ -1,0 +1,639 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Execute Trade | Instant Forex Execution Engine</title>
+    <link rel="stylesheet" href="{{ url_for('static', filename='css/execution.css') }}">
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&family=JetBrains+Mono:wght@400;500&display=swap" rel="stylesheet">
+</head>
+<body>
+    <div class="app-container">
+        <!-- Sidebar -->
+        <nav class="sidebar">
+            <div class="logo">
+                <span class="logo-icon">📊</span>
+                <span class="logo-text">FX Engine</span>
+            </div>
+            <ul class="nav-menu">
+                <li class="nav-item">
+                    <a href="/">
+                        <span class="nav-icon">🏠</span>
+                        <span>Dashboard</span>
+                    </a>
+                </li>
+                <li class="nav-item active">
+                    <a href="/execute">
+                        <span class="nav-icon">🎯</span>
+                        <span>Execute Trade</span>
+                    </a>
+                </li>
+                <li class="nav-item">
+                    <a href="/history">
+                        <span class="nav-icon">📜</span>
+                        <span>History</span>
+                    </a>
+                </li>
+            </ul>
+            <div class="session-info">
+                <div class="session-label">Current Session</div>
+                <div class="session-value" id="current-session">Loading...</div>
+                <div class="session-time" id="current-time">--:--:-- UTC</div>
+            </div>
+        </nav>
+
+        <!-- Main Content -->
+        <main class="main-content">
+            <!-- Header -->
+            <header class="header">
+                <div class="header-title">
+                    <h1>🎯 Trade Execution Analysis</h1>
+                    <p class="subtitle">Upload your weekly report and get instant execution decision</p>
+                </div>
+            </header>
+
+            <div class="execute-container">
+                <!-- Input Form -->
+                <div class="card card-form">
+                    <div class="card-header">
+                        <h3>📝 Trade Parameters</h3>
+                    </div>
+                    <div class="card-body">
+                        <form id="analysis-form" enctype="multipart/form-data">
+                            <div class="form-grid">
+                                <div class="form-group">
+                                    <label for="pair">Currency Pair</label>
+                                    <select id="pair" name="pair" required>
+                                        <option value="XAUUSD">🥇 XAUUSD (Gold)</option>
+                                        <option value="XAGUSD">🥈 XAGUSD (Silver)</option>
+                                        <option value="EURUSD">🇪🇺 EURUSD</option>
+                                        <option value="GBPUSD">🇬🇧 GBPUSD</option>
+                                        <option value="USDJPY">🇯🇵 USDJPY</option>
+                                        <option value="GBPJPY">🇬🇧🇯🇵 GBPJPY</option>
+                                        <option value="AUDUSD">🇦🇺 AUDUSD</option>
+                                        <option value="USDCAD">🇨🇦 USDCAD</option>
+                                        <option value="USDCHF">🇨🇭 USDCHF</option>
+                                        <option value="EURJPY">🇪🇺🇯🇵 EURJPY</option>
+                                        <option value="EURGBP">🇪🇺🇬🇧 EURGBP</option>
+                                        <option value="NZDUSD">🇳🇿 NZDUSD</option>
+                                    </select>
+                                </div>
+
+                                <div class="form-group">
+                                    <label for="direction">Your Direction</label>
+                                    <select id="direction" name="direction" required>
+                                        <option value="NOT SURE">❓ Not Sure</option>
+                                        <option value="BUY">🟢 BUY</option>
+                                        <option value="SELL">🔴 SELL</option>
+                                    </select>
+                                </div>
+
+                                <div class="form-group">
+                                    <label for="account_size">Account Size ($)</label>
+                                    <input type="number" id="account_size" name="account_size" 
+                                           value="10000" min="100" step="100" required>
+                                </div>
+
+                                <div class="form-group">
+                                    <label for="max_risk">Max Risk (%)</label>
+                                    <input type="number" id="max_risk" name="max_risk" 
+                                           value="1" min="0.1" max="5" step="0.1" required>
+                                </div>
+
+                                <div class="form-group">
+                                    <label for="leverage">Leverage</label>
+                                    <select id="leverage" name="leverage">
+                                        <option value="30">1:30</option>
+                                        <option value="50">1:50</option>
+                                        <option value="100" selected>1:100</option>
+                                        <option value="200">1:200</option>
+                                        <option value="500">1:500</option>
+                                    </select>
+                                </div>
+
+                                <div class="form-group">
+                                    <label for="entry_idea">Entry Idea</label>
+                                    <select id="entry_idea" name="entry_idea">
+                                        <option value="Market">Market Order</option>
+                                        <option value="Pullback">Wait for Pullback</option>
+                                        <option value="Limit">Limit Order</option>
+                                    </select>
+                                </div>
+                            </div>
+
+                            <div class="form-group form-group-full">
+                                <label for="weekly_report">Weekly Report (PDF) - Optional</label>
+                                <div class="file-upload">
+                                    <input type="file" id="weekly_report" name="weekly_report" 
+                                           accept=".pdf">
+                                    <div class="file-upload-label">
+                                        <span class="upload-icon">📄</span>
+                                        <span class="upload-text">Drop PDF here or click to upload</span>
+                                    </div>
+                                </div>
+                            </div>
+
+                            <button type="submit" class="btn btn-primary btn-large">
+                                🚀 Analyze & Get Decision
+                            </button>
+                        </form>
+                    </div>
+                </div>
+
+                <!-- Results Section -->
+                <div id="results-section" class="results-section hidden">
+                    <!-- Decision Card -->
+                    <div class="card decision-card" id="decision-card">
+                        <div class="decision-header">
+                            <span class="decision-emoji" id="decision-emoji">🔴</span>
+                            <span class="decision-action" id="decision-action">ANALYZING...</span>
+                        </div>
+                        <div class="decision-body">
+                            <div class="decision-confidence">
+                                <span class="conf-label">Confidence</span>
+                                <span class="conf-value" id="decision-confidence">--%</span>
+                            </div>
+                            <div class="decision-reason" id="decision-reason">
+                                Analyzing market conditions...
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- Scores Grid -->
+                    <div class="scores-grid">
+                        <div class="score-card">
+                            <div class="score-title">Instant Score</div>
+                            <div class="score-value" id="instant-score">--/28</div>
+                            <div class="score-bar">
+                                <div class="score-fill" id="instant-score-bar" style="width: 0%"></div>
+                            </div>
+                        </div>
+                        <div class="score-card">
+                            <div class="score-title">Trade Quality</div>
+                            <div class="score-value" id="trade-quality">--/100</div>
+                            <div class="score-bar">
+                                <div class="score-fill" id="trade-quality-bar" style="width: 0%"></div>
+                            </div>
+                        </div>
+                        <div class="score-card">
+                            <div class="score-title">MTF Score</div>
+                            <div class="score-value" id="mtf-score">--%</div>
+                            <div class="score-bar">
+                                <div class="score-fill" id="mtf-score-bar" style="width: 0%"></div>
+                            </div>
+                        </div>
+                        <div class="score-card">
+                            <div class="score-title">ICT Alignment</div>
+                            <div class="score-value" id="ict-score">--%</div>
+                            <div class="score-bar">
+                                <div class="score-fill" id="ict-score-bar" style="width: 0%"></div>
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- Details Tabs -->
+                    <div class="card details-card">
+                        <div class="tabs">
+                            <button class="tab active" data-tab="live-market">Live Market</button>
+                            <button class="tab" data-tab="ict-analysis">ICT Analysis</button>
+                            <button class="tab" data-tab="trade-levels">Trade Levels</button>
+                            <button class="tab" data-tab="risk">Risk & News</button>
+                        </div>
+
+                        <div class="tab-content active" id="tab-live-market">
+                            <div class="data-grid" id="live-market-data">
+                                <!-- Populated by JS -->
+                            </div>
+                        </div>
+
+                        <div class="tab-content" id="tab-ict-analysis">
+                            <div class="data-grid" id="ict-analysis-data">
+                                <!-- Populated by JS -->
+                            </div>
+                        </div>
+
+                        <div class="tab-content" id="tab-trade-levels">
+                            <div class="trade-levels-grid" id="trade-levels-data">
+                                <!-- Populated by JS -->
+                            </div>
+                        </div>
+
+                        <div class="tab-content" id="tab-risk">
+                            <div class="data-grid" id="risk-data">
+                                <!-- Populated by JS -->
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- Download Buttons -->
+                    <div class="download-section">
+                        <button class="btn btn-secondary" id="download-pdf" disabled>
+                            📄 Download PDF Report
+                        </button>
+                        <button class="btn btn-secondary" id="download-excel" disabled>
+                            📊 Download Excel Dashboard
+                        </button>
+                    </div>
+                </div>
+
+                <!-- Loading Overlay -->
+                <div id="loading-overlay" class="loading-overlay hidden">
+                    <div class="loading-spinner"></div>
+                    <div class="loading-text">Analyzing market conditions...</div>
+                    <div class="loading-steps" id="loading-steps">
+                        <div class="step">Reading weekly report...</div>
+                        <div class="step">Fetching live data...</div>
+                        <div class="step">Analyzing market structure...</div>
+                        <div class="step">Running ICT analysis...</div>
+                        <div class="step">Calculating scores...</div>
+                        <div class="step">Making decision...</div>
+                    </div>
+                </div>
+            </div>
+        </main>
+    </div>
+
+    <script src="{{ url_for('static', filename='js/execution.js') }}"></script>
+    <script>
+        let analysisData = null;
+
+        document.addEventListener('DOMContentLoaded', function() {
+            updateSession();
+            updateTime();
+            setInterval(updateTime, 1000);
+
+            // Check URL params for pair
+            const urlParams = new URLSearchParams(window.location.search);
+            const pair = urlParams.get('pair');
+            if (pair) {
+                document.getElementById('pair').value = pair;
+            }
+
+            // Form submission
+            document.getElementById('analysis-form').addEventListener('submit', handleAnalysis);
+
+            // Tab switching
+            document.querySelectorAll('.tab').forEach(tab => {
+                tab.addEventListener('click', function() {
+                    switchTab(this.dataset.tab);
+                });
+            });
+
+            // Download buttons
+            document.getElementById('download-pdf').addEventListener('click', downloadPDF);
+            document.getElementById('download-excel').addEventListener('click', downloadExcel);
+        });
+
+        async function handleAnalysis(e) {
+            e.preventDefault();
+            
+            showLoading();
+            
+            const formData = new FormData(e.target);
+            
+            try {
+                const response = await fetch('/api/analyze', {
+                    method: 'POST',
+                    body: formData
+                });
+                
+                const result = await response.json();
+                
+                if (result.success) {
+                    analysisData = result.data;
+                    displayResults(result.data);
+                } else {
+                    alert('Analysis failed: ' + result.error);
+                }
+            } catch (error) {
+                alert('Error: ' + error.message);
+            } finally {
+                hideLoading();
+            }
+        }
+
+        function displayResults(data) {
+            document.getElementById('results-section').classList.remove('hidden');
+            
+            // Decision card
+            const decision = data.final_decision || {};
+            const decisionCard = document.getElementById('decision-card');
+            
+            decisionCard.className = 'card decision-card decision-' + (decision.color || 'red');
+            document.getElementById('decision-emoji').textContent = decision.emoji || '🔴';
+            document.getElementById('decision-action').textContent = decision.action || 'ABORT';
+            document.getElementById('decision-confidence').textContent = (decision.confidence || 0) + '%';
+            document.getElementById('decision-reason').textContent = decision.reason || 'No reason provided';
+            
+            // Scores
+            const instantScore = data.instant_score || {};
+            const tradeQuality = data.trade_quality || {};
+            const mtfScore = data.mtf_score || {};
+            const ictAnalysis = data.ict_analysis || {};
+            
+            document.getElementById('instant-score').textContent = 
+                (instantScore.total || 0) + '/28';
+            document.getElementById('instant-score-bar').style.width = 
+                ((instantScore.total || 0) / 28 * 100) + '%';
+            
+            document.getElementById('trade-quality').textContent = 
+                (tradeQuality.total || 0).toFixed(1) + '/100';
+            document.getElementById('trade-quality-bar').style.width = 
+                (tradeQuality.total || 0) + '%';
+            
+            document.getElementById('mtf-score').textContent = 
+                (mtfScore.score || 0).toFixed(1) + '%';
+            document.getElementById('mtf-score-bar').style.width = 
+                (mtfScore.score || 0) + '%';
+            
+            const ictScore = ictAnalysis.alignment_score || {};
+            document.getElementById('ict-score').textContent = 
+                (ictScore.percentage || 0).toFixed(1) + '%';
+            document.getElementById('ict-score-bar').style.width = 
+                (ictScore.percentage || 0) + '%';
+            
+            // Live market data
+            displayLiveMarket(data.live_data || {});
+            
+            // ICT analysis
+            displayICTAnalysis(data.ict_analysis || {});
+            
+            // Trade levels
+            displayTradeLevels(data.trade_levels || {});
+            
+            // Risk data
+            displayRiskData(data);
+            
+            // Enable download buttons
+            document.getElementById('download-pdf').disabled = false;
+            document.getElementById('download-excel').disabled = false;
+            
+            // Scroll to results
+            document.getElementById('results-section').scrollIntoView({ behavior: 'smooth' });
+        }
+
+        function displayLiveMarket(liveData) {
+            const container = document.getElementById('live-market-data');
+            const priceData = liveData.price_data || {};
+            const techData = liveData.technical_data || {};
+            
+            container.innerHTML = `
+                <div class="data-item">
+                    <span class="data-label">Current Price</span>
+                    <span class="data-value">${priceData.current || 'N/A'}</span>
+                </div>
+                <div class="data-item">
+                    <span class="data-label">Day High</span>
+                    <span class="data-value">${priceData.high || 'N/A'}</span>
+                </div>
+                <div class="data-item">
+                    <span class="data-label">Day Low</span>
+                    <span class="data-value">${priceData.low || 'N/A'}</span>
+                </div>
+                <div class="data-item">
+                    <span class="data-label">Day Change</span>
+                    <span class="data-value ${priceData.day_change_pct >= 0 ? 'positive' : 'negative'}">
+                        ${priceData.day_change_pct || 0}%
+                    </span>
+                </div>
+                <div class="data-item">
+                    <span class="data-label">RSI (14)</span>
+                    <span class="data-value">${techData.rsi?.value || 'N/A'}</span>
+                </div>
+                <div class="data-item">
+                    <span class="data-label">MACD</span>
+                    <span class="data-value">${techData.macd?.trend || 'N/A'}</span>
+                </div>
+                <div class="data-item">
+                    <span class="data-label">ADX</span>
+                    <span class="data-value">${techData.adx?.value || 'N/A'}</span>
+                </div>
+                <div class="data-item">
+                    <span class="data-label">Consensus</span>
+                    <span class="data-value">${techData.consensus || 'N/A'}</span>
+                </div>
+            `;
+        }
+
+        function displayICTAnalysis(ictData) {
+            const container = document.getElementById('ict-analysis-data');
+            const liquidity = ictData.liquidity || {};
+            const ob = ictData.order_blocks || {};
+            const fvg = ictData.fair_value_gaps || {};
+            const zones = ictData.zones || {};
+            const smt = ictData.smt_divergence || {};
+            
+            container.innerHTML = `
+                <div class="data-item">
+                    <span class="data-label">Liquidity Sweep</span>
+                    <span class="data-value ${liquidity.sweep_detected ? 'positive' : ''}">
+                        ${liquidity.sweep_detected ? '✓ ' + liquidity.sweep_direction : '✗ None'}
+                    </span>
+                </div>
+                <div class="data-item">
+                    <span class="data-label">Order Block</span>
+                    <span class="data-value ${ob.active_ob ? 'positive' : ''}">
+                        ${ob.active_ob ? '✓ ' + ob.ob_direction : '✗ None'}
+                    </span>
+                </div>
+                <div class="data-item">
+                    <span class="data-label">Fair Value Gap</span>
+                    <span class="data-value ${fvg.fvg_present ? 'positive' : ''}">
+                        ${fvg.fvg_present ? '✓ ' + fvg.fvg_direction : '✗ None'}
+                    </span>
+                </div>
+                <div class="data-item">
+                    <span class="data-label">Zone</span>
+                    <span class="data-value">${zones.zone || 'N/A'} (${zones.zone_percentage || 0}%)</span>
+                </div>
+                <div class="data-item">
+                    <span class="data-label">In OTE Zone</span>
+                    <span class="data-value ${zones.ote_zone?.in_ote ? 'positive' : ''}">
+                        ${zones.ote_zone?.in_ote ? '✓ Yes' : '✗ No'}
+                    </span>
+                </div>
+                <div class="data-item">
+                    <span class="data-label">SMT Divergence</span>
+                    <span class="data-value ${smt.detected ? 'positive' : ''}">
+                        ${smt.detected ? '✓ ' + smt.divergence_type : '✗ None'}
+                    </span>
+                </div>
+            `;
+        }
+
+        function displayTradeLevels(tradeLevels) {
+            const container = document.getElementById('trade-levels-data');
+            
+            if (!tradeLevels || tradeLevels.error) {
+                container.innerHTML = '<div class="no-data">Trade levels not calculated - score below minimum</div>';
+                return;
+            }
+            
+            const levels = tradeLevels.levels || {};
+            const sizing = tradeLevels.sizing || {};
+            
+            container.innerHTML = `
+                <div class="levels-table">
+                    <div class="level-row header">
+                        <span>Level</span>
+                        <span>Price</span>
+                        <span>Pips</span>
+                        <span>R:R</span>
+                    </div>
+                    <div class="level-row entry">
+                        <span>Entry</span>
+                        <span>${levels.entry || 'N/A'}</span>
+                        <span>-</span>
+                        <span>-</span>
+                    </div>
+                    <div class="level-row sl">
+                        <span>Stop Loss</span>
+                        <span>${levels.stop_loss || 'N/A'}</span>
+                        <span>${levels.sl_pips || 'N/A'}</span>
+                        <span>-</span>
+                    </div>
+                    <div class="level-row tp">
+                        <span>TP1 (25%)</span>
+                        <span>${levels.tp1 || 'N/A'}</span>
+                        <span>${levels.tp1_pips || 'N/A'}</span>
+                        <span>1:1.5</span>
+                    </div>
+                    <div class="level-row tp">
+                        <span>TP2 (25%)</span>
+                        <span>${levels.tp2 || 'N/A'}</span>
+                        <span>${levels.tp2_pips || 'N/A'}</span>
+                        <span>1:3</span>
+                    </div>
+                    <div class="level-row tp">
+                        <span>TP3 (25%)</span>
+                        <span>${levels.tp3 || 'N/A'}</span>
+                        <span>${levels.tp3_pips || 'N/A'}</span>
+                        <span>1:5</span>
+                    </div>
+                    <div class="level-row tp">
+                        <span>TP4 (25%)</span>
+                        <span>${levels.tp4 || 'N/A'}</span>
+                        <span>${levels.tp4_pips || 'N/A'}</span>
+                        <span>1:8</span>
+                    </div>
+                </div>
+                <div class="sizing-info">
+                    <div class="sizing-item">
+                        <span class="sizing-label">Lot Size</span>
+                        <span class="sizing-value">${sizing.lot_size || 'N/A'}</span>
+                    </div>
+                    <div class="sizing-item">
+                        <span class="sizing-label">Risk Amount</span>
+                        <span class="sizing-value">$${sizing.risk_amount || 'N/A'}</span>
+                    </div>
+                    <div class="sizing-item">
+                        <span class="sizing-label">Max Loss</span>
+                        <span class="sizing-value">$${sizing.max_loss || 'N/A'}</span>
+                    </div>
+                </div>
+            `;
+        }
+
+        function displayRiskData(data) {
+            const container = document.getElementById('risk-data');
+            const news = data.news_gate || {};
+            const killZone = data.kill_zone || {};
+            const dxy = data.dxy_analysis || {};
+            const proTest = data.pro_test || {};
+            
+            container.innerHTML = `
+                <div class="data-item">
+                    <span class="data-label">News Status</span>
+                    <span class="data-value ${news.clear ? 'positive' : news.blocked ? 'negative' : 'warning'}">
+                        ${news.risk_level || 'N/A'}
+                    </span>
+                </div>
+                <div class="data-item">
+                    <span class="data-label">Kill Zone</span>
+                    <span class="data-value ${killZone.is_kill_zone ? 'positive' : ''}">
+                        ${killZone.is_kill_zone ? '✓ Active' : '✗ Not Active'}
+                    </span>
+                </div>
+                <div class="data-item">
+                    <span class="data-label">Session Quality</span>
+                    <span class="data-value">${killZone.session_score?.quality || 'N/A'}</span>
+                </div>
+                <div class="data-item">
+                    <span class="data-label">DXY Status</span>
+                    <span class="data-value">${dxy.classification?.status || 'N/A'}</span>
+                </div>
+                <div class="data-item">
+                    <span class="data-label">DXY Supports Trade</span>
+                    <span class="data-value ${dxy.supports_trade ? 'positive' : 'negative'}">
+                        ${dxy.supports_trade ? '✓ Yes' : '✗ No'}
+                    </span>
+                </div>
+                <div class="data-item">
+                    <span class="data-label">Pro Test</span>
+                    <span class="data-value ${proTest.all_pass ? 'positive' : 'negative'}">
+                        ${proTest.verdict || 'N/A'} (${proTest.pass_count || 0}/${proTest.total_tests || 4})
+                    </span>
+                </div>
+            `;
+        }
+
+        function switchTab(tabId) {
+            document.querySelectorAll('.tab').forEach(t => t.classList.remove('active'));
+            document.querySelectorAll('.tab-content').forEach(c => c.classList.remove('active'));
+            
+            document.querySelector(`[data-tab="${tabId}"]`).classList.add('active');
+            document.getElementById(`tab-${tabId}`).classList.add('active');
+        }
+
+        function showLoading() {
+            document.getElementById('loading-overlay').classList.remove('hidden');
+        }
+
+        function hideLoading() {
+            document.getElementById('loading-overlay').classList.add('hidden');
+        }
+
+        async function downloadPDF() {
+            if (!analysisData) return;
+            
+            try {
+                const response = await fetch('/api/generate-pdf', {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify(analysisData)
+                });
+                
+                const blob = await response.blob();
+                const url = window.URL.createObjectURL(blob);
+                const a = document.createElement('a');
+                a.href = url;
+                a.download = `Trade_Decision_${new Date().toISOString().slice(0,10)}.pdf`;
+                a.click();
+            } catch (error) {
+                alert('Error generating PDF: ' + error.message);
+            }
+        }
+
+        async function downloadExcel() {
+            if (!analysisData) return;
+            
+            try {
+                const response = await fetch('/api/generate-excel', {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify(analysisData)
+                });
+                
+                const blob = await response.blob();
+                const url = window.URL.createObjectURL(blob);
+                const a = document.createElement('a');
+                a.href = url;
+                a.download = `Trade_Decision_${new Date().toISOString().slice(0,10)}.xlsx`;
+                a.click();
+            } catch (error) {
+                alert('Error generating Excel: ' + error.message);
+            }
+        }
+    </script>
+</body>
+</html>

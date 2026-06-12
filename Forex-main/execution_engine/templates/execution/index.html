@@ -1,0 +1,241 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Instant Forex Execution Engine</title>
+    <link rel="stylesheet" href="{{ url_for('static', filename='css/execution.css') }}">
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&family=JetBrains+Mono:wght@400;500&display=swap" rel="stylesheet">
+</head>
+<body>
+    <div class="app-container">
+        <!-- Sidebar -->
+        <nav class="sidebar">
+            <div class="logo">
+                <span class="logo-icon">📊</span>
+                <span class="logo-text">FX Engine</span>
+            </div>
+            <ul class="nav-menu">
+                <li class="nav-item active">
+                    <a href="/">
+                        <span class="nav-icon">🏠</span>
+                        <span>Dashboard</span>
+                    </a>
+                </li>
+                <li class="nav-item">
+                    <a href="/execute">
+                        <span class="nav-icon">🎯</span>
+                        <span>Execute Trade</span>
+                    </a>
+                </li>
+                <li class="nav-item">
+                    <a href="/history">
+                        <span class="nav-icon">📜</span>
+                        <span>History</span>
+                    </a>
+                </li>
+            </ul>
+            <div class="session-info">
+                <div class="session-label">Current Session</div>
+                <div class="session-value" id="current-session">Loading...</div>
+                <div class="session-time" id="current-time">--:--:-- UTC</div>
+            </div>
+        </nav>
+
+        <!-- Main Content -->
+        <main class="main-content">
+            <!-- Header -->
+            <header class="header">
+                <div class="header-title">
+                    <h1>Instant Forex Execution Engine</h1>
+                    <p class="subtitle">ICT + SMC + COT Analysis | Real-Time Decision System</p>
+                </div>
+                <div class="header-actions">
+                    <button class="btn btn-primary" onclick="window.location.href='/execute'">
+                        🚀 New Analysis
+                    </button>
+                </div>
+            </header>
+
+            <!-- Dashboard Grid -->
+            <div class="dashboard-grid">
+                <!-- Market Overview Card -->
+                <div class="card card-large">
+                    <div class="card-header">
+                        <h3>🌍 Market Overview</h3>
+                        <span class="badge badge-live">LIVE</span>
+                    </div>
+                    <div class="card-body">
+                        <div class="market-grid" id="market-overview">
+                            <div class="market-item">
+                                <span class="market-label">DXY</span>
+                                <span class="market-value" id="dxy-value">--</span>
+                                <span class="market-change" id="dxy-change">--%</span>
+                            </div>
+                            <div class="market-item">
+                                <span class="market-label">US10Y</span>
+                                <span class="market-value" id="us10y-value">--</span>
+                                <span class="market-change" id="us10y-change">--%</span>
+                            </div>
+                            <div class="market-item">
+                                <span class="market-label">VIX</span>
+                                <span class="market-value" id="vix-value">--</span>
+                                <span class="market-change" id="vix-change">--%</span>
+                            </div>
+                            <div class="market-item">
+                                <span class="market-label">GOLD</span>
+                                <span class="market-value" id="gold-value">--</span>
+                                <span class="market-change" id="gold-change">--%</span>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Session Status Card -->
+                <div class="card">
+                    <div class="card-header">
+                        <h3>⏰ Trading Sessions</h3>
+                    </div>
+                    <div class="card-body">
+                        <div class="session-grid">
+                            <div class="session-item" id="session-sydney">
+                                <span class="session-name">Sydney</span>
+                                <span class="session-status">--</span>
+                            </div>
+                            <div class="session-item" id="session-tokyo">
+                                <span class="session-name">Tokyo</span>
+                                <span class="session-status">--</span>
+                            </div>
+                            <div class="session-item" id="session-london">
+                                <span class="session-name">London</span>
+                                <span class="session-status">--</span>
+                            </div>
+                            <div class="session-item" id="session-newyork">
+                                <span class="session-name">New York</span>
+                                <span class="session-status">--</span>
+                            </div>
+                        </div>
+                        <div class="kill-zone-status" id="kill-zone-status">
+                            <span class="kz-label">Kill Zone:</span>
+                            <span class="kz-value">--</span>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Quick Actions Card -->
+                <div class="card">
+                    <div class="card-header">
+                        <h3>⚡ Quick Analysis</h3>
+                    </div>
+                    <div class="card-body">
+                        <div class="quick-pairs">
+                            <button class="pair-btn" onclick="quickAnalyze('XAUUSD')">🥇 XAUUSD</button>
+                            <button class="pair-btn" onclick="quickAnalyze('XAGUSD')">🥈 XAGUSD</button>
+                            <button class="pair-btn" onclick="quickAnalyze('EURUSD')">🇪🇺 EURUSD</button>
+                            <button class="pair-btn" onclick="quickAnalyze('GBPUSD')">🇬🇧 GBPUSD</button>
+                            <button class="pair-btn" onclick="quickAnalyze('USDJPY')">🇯🇵 USDJPY</button>
+                            <button class="pair-btn" onclick="quickAnalyze('AUDUSD')">🇦🇺 AUDUSD</button>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Decision Legend Card -->
+                <div class="card">
+                    <div class="card-header">
+                        <h3>🚦 Decision Legend</h3>
+                    </div>
+                    <div class="card-body">
+                        <div class="legend-grid">
+                            <div class="legend-item">
+                                <span class="legend-dot green"></span>
+                                <span class="legend-text">EXECUTE NOW</span>
+                                <span class="legend-desc">Score ≥22, Quality ≥85%</span>
+                            </div>
+                            <div class="legend-item">
+                                <span class="legend-dot yellow"></span>
+                                <span class="legend-text">WAIT</span>
+                                <span class="legend-desc">Score 14-21, needs confirmation</span>
+                            </div>
+                            <div class="legend-item">
+                                <span class="legend-dot orange"></span>
+                                <span class="legend-text">MONITOR</span>
+                                <span class="legend-desc">Good bias, price not at zone</span>
+                            </div>
+                            <div class="legend-item">
+                                <span class="legend-dot red"></span>
+                                <span class="legend-text">ABORT</span>
+                                <span class="legend-desc">Score &lt;14 or blocked</span>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Scoring System Card -->
+                <div class="card card-large">
+                    <div class="card-header">
+                        <h3>📊 Scoring System</h3>
+                    </div>
+                    <div class="card-body">
+                        <div class="scoring-grid">
+                            <div class="score-category">
+                                <h4>Instant Score (/28)</h4>
+                                <ul class="score-list">
+                                    <li>Weekly Direction Valid: +3</li>
+                                    <li>Approved In Report: +2</li>
+                                    <li>Sure Trade: +1</li>
+                                    <li>Live MTF > 50: +3</li>
+                                    <li>Liquidity Sweep: +3</li>
+                                    <li>Inside OB/FVG: +2</li>
+                                    <li>BOS/CHOCH: +2</li>
+                                    <li>RSI Alignment: +2</li>
+                                    <li>MACD Alignment: +2</li>
+                                    <li>DXY Supports: +2</li>
+                                    <li>No News: +2</li>
+                                    <li>Prime Session: +1</li>
+                                    <li>Pivot Alignment: +1</li>
+                                    <li>DXY Unchanged: +1</li>
+                                    <li>Premium/Discount: +1</li>
+                                </ul>
+                            </div>
+                            <div class="score-category">
+                                <h4>Trade Quality (/100)</h4>
+                                <ul class="score-list">
+                                    <li>Weekly Report: 20 pts</li>
+                                    <li>Live MTF: 20 pts</li>
+                                    <li>ICT Alignment: 20 pts</li>
+                                    <li>Liquidity: 15 pts</li>
+                                    <li>DXY: 10 pts</li>
+                                    <li>Session: 5 pts</li>
+                                    <li>News: 5 pts</li>
+                                    <li>Correlation: 5 pts</li>
+                                </ul>
+                                <div class="quality-thresholds">
+                                    <span class="threshold elite">90+ ELITE</span>
+                                    <span class="threshold high">80+ HIGH</span>
+                                    <span class="threshold ok">70+ OK</span>
+                                    <span class="threshold abort">&lt;70 ABORT</span>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </main>
+    </div>
+
+    <script src="{{ url_for('static', filename='js/execution.js') }}"></script>
+    <script>
+        // Initialize dashboard
+        document.addEventListener('DOMContentLoaded', function() {
+            updateSession();
+            updateTime();
+            setInterval(updateTime, 1000);
+            setInterval(updateSession, 30000);
+        });
+
+        function quickAnalyze(pair) {
+            window.location.href = `/execute?pair=${pair}`;
+        }
+    </script>
+</body>
+</html>

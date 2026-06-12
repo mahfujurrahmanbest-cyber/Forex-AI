@@ -1,0 +1,44 @@
+version: '3.8'
+
+services:
+  report-generator:
+    build:
+      context: .
+      dockerfile: Dockerfile
+    container_name: forex-report-generator
+    ports:
+      - "5000:5000"
+    environment:
+      - FLASK_APP=app.py
+      - FLASK_ENV=production
+      - SECRET_KEY=${SECRET_KEY:-your-secret-key-here}
+    volumes:
+      - ./reports:/app/reports
+      - ./uploads:/app/uploads
+    networks:
+      - forex-network
+    restart: unless-stopped
+
+  execution-engine:
+    build:
+      context: ./execution_engine
+      dockerfile: Dockerfile
+    container_name: forex-execution-engine
+    ports:
+      - "5001:5001"
+    environment:
+      - FLASK_APP=app.py
+      - FLASK_ENV=production
+      - SECRET_KEY=${SECRET_KEY:-your-secret-key-here}
+    volumes:
+      - ./execution_engine/reports:/app/reports
+      - ./execution_engine/uploads:/app/uploads
+    networks:
+      - forex-network
+    restart: unless-stopped
+    depends_on:
+      - report-generator
+
+networks:
+  forex-network:
+    driver: bridge

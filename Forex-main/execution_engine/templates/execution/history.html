@@ -1,0 +1,82 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>History | Instant Forex Execution Engine</title>
+    <link rel="stylesheet" href="{{ url_for('static', filename='css/execution.css') }}">
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&family=JetBrains+Mono:wght@400;500&display=swap" rel="stylesheet">
+</head>
+<body>
+    <div class="app-container">
+        <!-- Sidebar -->
+        <nav class="sidebar">
+            <div class="logo">
+                <span class="logo-icon">📊</span>
+                <span class="logo-text">FX Engine</span>
+            </div>
+            <ul class="nav-menu">
+                <li class="nav-item">
+                    <a href="/">
+                        <span class="nav-icon">🏠</span>
+                        <span>Dashboard</span>
+                    </a>
+                </li>
+                <li class="nav-item">
+                    <a href="/execute">
+                        <span class="nav-icon">🎯</span>
+                        <span>Execute Trade</span>
+                    </a>
+                </li>
+                <li class="nav-item active">
+                    <a href="/history">
+                        <span class="nav-icon">📜</span>
+                        <span>History</span>
+                    </a>
+                </li>
+            </ul>
+            <div class="session-info">
+                <div class="session-label">Current Session</div>
+                <div class="session-value" id="current-session">Loading...</div>
+                <div class="session-time" id="current-time">--:--:-- UTC</div>
+            </div>
+        </nav>
+
+        <!-- Main Content -->
+        <main class="main-content">
+            <!-- Header -->
+            <header class="header">
+                <div class="header-title">
+                    <h1>📜 Analysis History</h1>
+                    <p class="subtitle">View past trade analysis and decisions</p>
+                </div>
+            </header>
+
+            <div class="history-container">
+                <div class="card">
+                    <div class="card-header">
+                        <h3>Recent Analyses</h3>
+                    </div>
+                    <div class="card-body">
+                        <div class="empty-state">
+                            <span class="empty-icon">📊</span>
+                            <p>No analysis history yet.</p>
+                            <p>Run your first analysis to see it here.</p>
+                            <a href="/execute" class="btn btn-primary">Start Analysis</a>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </main>
+    </div>
+
+    <script src="{{ url_for('static', filename='js/execution.js') }}"></script>
+    <script>
+        document.addEventListener('DOMContentLoaded', function() {
+            updateSession();
+            updateTime();
+            setInterval(updateTime, 1000);
+        });
+    </script>
+</body>
+</html>
